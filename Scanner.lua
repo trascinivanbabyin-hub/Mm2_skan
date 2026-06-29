@@ -37,7 +37,7 @@ end
 
 print("==================== SCANNER RESULTS ====================")
 if #results == 0 then
-    print("Nothing found. Run in a round with coins and weapons.")
+    print("Nothing found.")
 else
     for _, v in ipairs(results) do
         print(v)
