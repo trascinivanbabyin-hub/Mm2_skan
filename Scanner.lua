@@ -1,46 +1,39 @@
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local results = {}
+local msg = Instance.new("Message")
+msg.Parent = workspace
 
-for _, player in ipairs(Players:GetPlayers()) do
-    local char = player.Character
-    local backpack = player:FindFirstChild("Backpack")
-    local function scan(container, location)
-        if not container then return end
-        for _, item in ipairs(container:GetChildren()) do
-            if item:IsA("Tool") then
-                table.insert(results, "[Weapon] " .. player.Name .. " | " .. location .. ": " .. item.Name)
+local found = false
+for _, obj in ipairs(workspace:GetChildren()) do
+    if obj:IsA("Model") then
+        local cc = obj:FindFirstChild("CoinContainer")
+        if cc then
+            found = true
+            msg.Text = "Map: " .. obj.Name .. " | Coins: " .. #cc:GetChildren()
+            for _, coin in ipairs(cc:GetChildren()) do
+                local part = nil
+                for _, child in ipairs(coin:GetDescendants()) do
+                    if (child.Name == "MainCoin" or child.Name == "Coin") and child:IsA("BasePart") then
+                        part = child
+                        break
+                    end
+                end
+                if part then
+                    msg.Text = msg.Text .. " | Found: " .. part.Name
+                else
+                    msg.Text = msg.Text .. " | No part in " .. coin.Name
+                end
+                wait(1)
             end
+            break
         end
     end
-    scan(char, "Character")
-    scan(backpack, "Backpack")
 end
 
-for _, obj in ipairs(Workspace:GetDescendants()) do
-    if obj.Name:lower():find("coin") then
-        local parent = obj.Parent
-        local parentName = parent and parent.Name or "NO_PARENT"
-        local touch = obj:FindFirstChild("TouchInterest")
-        local info = "[Coin] Parent: " .. parentName .. " | Name: " .. obj.Name .. " | Class: " .. obj.ClassName
-        if touch then info = info .. " | TouchInterest: YES" end
-        local key = parentName .. obj.Name
-        if not results[key] then results[key] = info end
+if not found then
+    msg.Text = "No CoinContainer found. Waiting..."
+    wait(3)
+    msg.Text = "Workspace children: " .. #workspace:GetChildren()
+    for _, child in ipairs(workspace:GetChildren()) do
+        msg.Text = msg.Text .. " | " .. child.Name
+        wait(0.3)
     end
 end
-
-for _, obj in ipairs(Workspace:GetChildren()) do
-    if obj.Name:lower():find("gun") or obj.Name:lower():find("drop") then
-        table.insert(results, "[Dropped] " .. obj.Name .. " | Class: " .. obj.ClassName)
-    end
-end
-
-print("==================== SCANNER RESULTS ====================")
-if #results == 0 then
-    print("Nothing found.")
-else
-    for _, v in ipairs(results) do
-        print(v)
-    end
-end
-print("=========================================================")
